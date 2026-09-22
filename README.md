@@ -61,7 +61,6 @@ The second layer is the MeasurementSerie class, which represents a statistical s
 
 The third and central layer is the MonteCarloEstimator class, which implements the Monte-Carlo simulation itself. Given a list of Measurement instances (each possibly originating from a MeasurementSerie, via Type A estimation, or from a direct Type B estimation) and a function f combining them, it estimates the resulting composed uncertainty by repeated random sampling. This is the central class of the project: it is what allows uncertainty propagation through arbitrary — including non-linear — functions, without requiring an analytical derivation.
 
-
 ## Validation
 
 To validate the Monte-Carlo estimator, its result was compared against the
@@ -70,17 +69,19 @@ uncertainties, general case):
 
 $$u(y) = \sqrt{\sum_{i=1}^{n} \left(\frac{\partial f}{\partial x_i} u(x_i)\right)^2}$$
 
-For the parallel resistance example ($R_{eq} = \frac{R_1 R_2}{R_1+R_2}$):
+For the parallel resistance example ($R_{eq} = \frac{R_1 R_2}{R_1+R_2}$),
+with $R_1 = 220.18 \pm 0.12\ \Omega$ (Type A, N = 6) and
+$R_2 = 330.00 \pm 0.87\ \Omega$ (Type B, $\Delta = 1.5\ \Omega$):
 
-$$\frac{\partial R_{eq}}{\partial R_1} = \frac{R_2^2}{(R_1+R_2)^2}, \quad
-\frac{\partial R_{eq}}{\partial R_2} = \frac{R_1^2}{(R_1+R_2)^2}$$
+$$\frac{\partial R_{eq}}{\partial R_1} = \frac{R_2^2}{(R_1+R_2)^2} \approx 0.360, \quad
+\frac{\partial R_{eq}}{\partial R_2} = \frac{R_1^2}{(R_1+R_2)^2} \approx 0.160$$
 
-| Method              | R_eq (Ω) | u(R_eq) (Ω) |
-|---------------------|----------|-------------|
-| Analytical (partial derivatives) | *TODO* | *TODO* |
-| Monte-Carlo (N = 100 000)        | *TODO* | *TODO* |
+| Method                             | R_eq (Ω) | u(R_eq) (Ω) |
+|-------------------------------------|----------|-------------|
+| Analytical (partial derivatives)    | 132.07   | 0.146       |
+| Monte-Carlo (N = 100 000)           | 132.07   | 0.146       |
 
-The two methods agree within *TODO*%, confirming the correctness of the
+The two methods agree within 0.06%, confirming the correctness of the
 Monte-Carlo implementation.
 
 ## Limitations
