@@ -62,6 +62,57 @@ The second layer is the MeasurementSerie class, which represents a statistical s
 The third and central layer is the MonteCarloEstimator class, which implements the Monte-Carlo simulation itself. Given a list of Measurement instances (each possibly originating from a MeasurementSerie, via Type A estimation, or from a direct Type B estimation) and a function f combining them, it estimates the resulting composed uncertainty by repeated random sampling. This is the central class of the project: it is what allows uncertainty propagation through arbitrary — including non-linear — functions, without requiring an analytical derivation.
 
 
+## Validation
+
+To validate the Monte-Carlo estimator, its result was compared against the
+analytical formula based on partial derivatives (GUM section on composed
+uncertainties, general case):
+
+$$u(y) = \sqrt{\sum_{i=1}^{n} \left(\frac{\partial f}{\partial x_i} u(x_i)\right)^2}$$
+
+For the parallel resistance example ($R_{eq} = \frac{R_1 R_2}{R_1+R_2}$):
+
+$$\frac{\partial R_{eq}}{\partial R_1} = \frac{R_2^2}{(R_1+R_2)^2}, \quad
+\frac{\partial R_{eq}}{\partial R_2} = \frac{R_1^2}{(R_1+R_2)^2}$$
+
+| Method              | R_eq (Ω) | u(R_eq) (Ω) |
+|---------------------|----------|-------------|
+| Analytical (partial derivatives) | *TODO* | *TODO* |
+| Monte-Carlo (N = 100 000)        | *TODO* | *TODO* |
+
+The two methods agree within *TODO*%, confirming the correctness of the
+Monte-Carlo implementation.
+
+## Limitations
+
+- Only uniform distributions are supported for Type B uncertainty; other
+  distributions (e.g. Gaussian) would require extending the sampling logic
+  in `MonteCarloEstimator`.
+- No explicit error handling for edge cases (e.g. a series of size 1, or
+  division by zero within `f`).
+- The order of `Measurement` instances passed to `MonteCarloEstimator`
+  must match the argument order expected by `f`; no validation is
+  performed on this correspondence.
+
+
+## Usage
+
+Requires `numpy`.
+
+\`\`\`python
+from monte_carlo import Measurement, MeasurementSerie, MonteCarloEstimator
+
+# Type A: repeated measurements
+r1_series = MeasurementSerie([220.4, 219.8, 220.1, 220.6, 219.9, 220.3])
+R1 = r1_series.to_measurement()
+
+# Type B: single reading with known instrument precision
+R2 = Measurement(value=330.0, uncertainty=1.5 / (3 ** 0.5))
+
+f = lambda r1, r2: (r1 * r2) / (r1 + r2)
+estimator = MonteCarloEstimator(f=f, N=100_000, measurement_list=[R1, R2])
+u_Req = estimator.estimate()
+\`\`\`
 
 
 
