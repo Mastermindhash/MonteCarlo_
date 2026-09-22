@@ -57,6 +57,11 @@ This implementation follows a three-layer object-oriented design.
 
 The first layer is the Measurement class, which represents a single measurement as a value paired with its standard uncertainty. This encapsulation is valuable because it decouples how an uncertainty was obtained (through statistical analysis of a series, or through an instrument's stated precision) from how it is later used — in particular, by the Monte-Carlo estimator, which only needs a value and an uncertainty, regardless of their origin.
 
+The second layer is the MeasurementSerie class, which represents a statistical series of repeated measurements and implements the usual statistical methods (mean, variance, standard deviation) needed to compute a Type A uncertainty. Separating this logic into its own class is valuable because it isolates the statistical computation itself from how the resulting uncertainty is later used.
+
+The third and central layer is the MonteCarloEstimator class, which implements the Monte-Carlo simulation itself. Given a list of Measurement instances (each possibly originating from a MeasurementSerie, via Type A estimation, or from a direct Type B estimation) and a function f combining them, it estimates the resulting composed uncertainty by repeated random sampling. This is the central class of the project: it is what allows uncertainty propagation through arbitrary — including non-linear — functions, without requiring an analytical derivation.
+
+
 
 
 
